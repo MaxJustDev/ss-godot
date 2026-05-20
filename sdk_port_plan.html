@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>ss-godot — SaiGame Services SDK port for Godot 4</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --accent:#d4af37; --accent2:#7aa2f7;
+    --good:#9ece6a; --bad:#f7768e; --text:#e6e6e6; --muted:#9aa0a6; --border:#2a2f3a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.6}
+  header{background:linear-gradient(135deg,#1a1f2e,#0f1115);padding:48px 32px;border-bottom:2px solid var(--accent);text-align:center}
+  header h1{margin:0;font-size:2em;color:var(--accent);letter-spacing:1px}
+  header .sub{color:var(--muted);margin-top:8px;font-size:1.05em}
+  header .badges{margin-top:16px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+  .badge{background:var(--panel);border:1px solid var(--border);padding:4px 12px;border-radius:16px;font-size:0.85em;color:var(--accent2)}
+  main{max-width:1100px;margin:0 auto;padding:32px}
+  section{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:24px 28px;margin-bottom:24px;box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+  h2{color:var(--accent);border-bottom:1px solid var(--border);padding-bottom:8px;margin-top:0;font-size:1.5em}
+  h3{color:var(--accent2);margin-top:24px;font-size:1.15em}
+  h4{color:#e0c97f;margin-top:16px;margin-bottom:6px}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:0.95em}
+  th,td{border:1px solid var(--border);padding:8px 12px;text-align:left;vertical-align:top}
+  th{background:#1f2430;color:var(--accent);font-weight:600}
+  tr:nth-child(even) td{background:rgba(255,255,255,0.02)}
+  code,kbd{background:#0a0c10;padding:2px 6px;border-radius:4px;color:#7dcfff;font-family:Consolas,monospace;font-size:0.9em}
+  pre{background:#0a0c10;padding:14px;border-radius:8px;color:#9ece6a;overflow:auto;font-size:0.85em}
+  ul{padding-left:20px}
+  li{margin:4px 0}
+  .quote{border-left:3px solid var(--accent);padding:8px 14px;background:rgba(212,175,55,0.06);margin:12px 0;font-style:italic;color:#d4d4d4}
+  .pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.8em;margin-right:4px}
+  .pill.good{background:rgba(158,206,106,0.15);color:var(--good);border:1px solid var(--good)}
+  .pill.bad{background:rgba(247,118,142,0.15);color:var(--bad);border:1px solid var(--bad)}
+  .pill.neutral{background:rgba(122,162,247,0.15);color:var(--accent2);border:1px solid var(--accent2)}
+  .footer{text-align:center;color:var(--muted);padding:24px;font-size:0.85em}
+  details{border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin:8px 0;background:#0f1218}
+  details summary{cursor:pointer;color:var(--accent2);font-weight:600}
+  details[open] summary{color:var(--accent);margin-bottom:8px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📦 ss-godot</h1>
+  <div class="sub">Port SaiGame Services SDK từ Unity sang Godot 4 — publish lên Godot Asset Library</div>
+  <div class="badges">
+    <span class="badge">Standalone Project</span>
+    <span class="badge">Godot 4.3+</span>
+    <span class="badge">MIT License (proposed)</span>
+    <span class="badge">Distribution: Asset Library + GitHub release</span>
+    <span class="badge">Upstream: github.com/SaiGame-studio/ss-unity</span>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <h2>0. Mục tiêu &amp; Phạm vi</h2>
+  <h3>Goal</h3>
+  <p>Port toàn bộ <b>SaiGame Services SDK v0.2.40d</b> từ Unity C# sang Godot 4 GDScript, đóng gói dạng <b>plugin addon</b>, publish lên <b>Godot Asset Library</b> để bất kỳ project Godot nào cũng import 1-click và dùng.</p>
+
+  <h3>Non-goals (việc KHÔNG làm)</h3>
+  <ul>
+    <li>Không thay đổi backend SaiGame (giữ nguyên <code>api.saigame.studio</code>).</li>
+    <li>Không thay đổi protocol REST hiện có — port tương đương 1-1.</li>
+    <li>Không gắn business logic của game vào — chỉ làm SDK pure.</li>
+    <li>Không hỗ trợ Unity feature không có ở Godot (vd: ScriptableObject inspector custom — sẽ dùng Resource).</li>
+  </ul>
+
+  <h3>Lý do tách project riêng</h3>
+  <ul>
+    <li><b>Reusable</b>: bất kỳ project Godot nào dùng SaiGame backend đều import được.</li>
+    <li><b>Versioning độc lập</b>: SDK update không buộc game update.</li>
+    <li><b>Cộng đồng</b>: đóng góp / bug report tập trung 1 repo.</li>
+    <li><b>Maintenance</b>: bug fix 1 nơi, hưởng ở mọi project.</li>
+    <li><b>Showcase</b>: portfolio open source. SaiGame studio có thể đỡ chính thức hóa.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>1. Thông tin project</h2>
+  <table>
+    <tr><th>Field</th><th>Value</th></tr>
+    <tr><td>Tên project</td><td><code>ss-godot</code></td></tr>
+    <tr><td>Display name</td><td>SaiGame Services SDK (Godot)</td></tr>
+    <tr><td>Repo</td><td><code>github.com/&lt;your-org&gt;/ss-godot</code></td></tr>
+    <tr><td>License</td><td><b>MIT</b> (đề xuất; xác nhận với SaiGame studio nếu họ yêu cầu khác)</td></tr>
+    <tr><td>Godot version</td><td>4.3+ (test 4.3, 4.4)</td></tr>
+    <tr><td>Ngôn ngữ chính</td><td>GDScript (zero dependency)</td></tr>
+    <tr><td>C# build support</td><td>Optional — chỉ cho AES nếu Godot Crypto không đủ</td></tr>
+    <tr><td>Asset Library category</td><td><b>Tools / Misc</b> (hoặc "Demos" + "Scripts")</td></tr>
+    <tr><td>Version đầu</td><td><b>0.1.0</b> (mirror Unity v0.2.40d nhưng đánh số mới vì port khác)</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>2. Cấu trúc thư mục addon</h2>
+  <p>Godot plugin chuẩn nằm trong <code>addons/&lt;plugin_name&gt;/</code>. Khi user import từ Asset Library, file đặt vào đúng vị trí này.</p>
+<pre>
+ss-godot/                                    # Root repo
+├── .github/
+│   └── workflows/
+│       ├── ci.yml                           # Lint + test GDScript
+│       └── release.yml                      # Auto publish Asset Library
+├── addons/
+│   └── sai_services/                        # ← Đây là plugin thật
+│       ├── plugin.cfg                       # Godot plugin manifest
+│       ├── plugin.gd                        # Plugin entry (autoload setup)
+│       ├── LICENSE
+│       ├── README.md
+│       ├── CHANGELOG.md
+│       ├── icon.svg
+│       ├── core/
+│       │   ├── sai_server.gd                # HTTP wrapper
+│       │   ├── sai_singleton.gd             # Base class
+│       │   └── sai_logger.gd
+│       ├── auth/
+│       │   ├── sai_auth.gd
+│       │   ├── google_backend_login.gd
+│       │   └── dto/user_data.gd
+│       ├── progress/
+│       │   ├── gamer_progress.gd
+│       │   └── dto/progress_data.gd
+│       ├── mailbox/
+│       │   ├── mailbox.gd
+│       │   └── dto/mail_data.gd
+│       ├── item_container/
+│       │   ├── player_item.gd
+│       │   ├── player_container.gd
+│       │   ├── item_preset.gd
+│       │   ├── item_crafting.gd
+│       │   ├── item_generator.gd
+│       │   ├── equipment_slot.gd
+│       │   ├── item_move.gd
+│       │   ├── item_swap.gd
+│       │   ├── item_tag.gd
+│       │   ├── item_add_deduct.gd
+│       │   └── dto/
+│       │       ├── item_data.gd
+│       │       ├── container_data.gd
+│       │       └── ...
+│       ├── shop/
+│       │   ├── shop.gd
+│       │   └── dto/shop_data.gd
+│       ├── quest/
+│       │   ├── chain_quest.gd
+│       │   ├── daily_quest.gd
+│       │   ├── quest_progressor.gd
+│       │   ├── quest_history.gd
+│       │   └── dto/quest_data.gd
+│       ├── journey/
+│       │   ├── player_event.gd
+│       │   └── dto/event_data.gd
+│       ├── leaderboard/
+│       │   ├── leaderboard.gd
+│       │   └── dto/leaderboard_data.gd
+│       ├── battle/
+│       │   ├── battle_sessions.gd
+│       │   ├── battle_script.gd
+│       │   └── dto/battle_data.gd
+│       └── util/
+│           ├── aes_helper.gd
+│           ├── json_helper.gd
+│           └── http_helper.gd
+├── demo/                                    # Demo project (kèm vào để showcase)
+│   ├── project.godot
+│   ├── scenes/
+│   │   └── demo.tscn                        # Mirror Unity demo scene
+│   └── scripts/
+│       └── demo_controller.gd
+├── tests/                                   # GUT test framework
+│   ├── unit/
+│   │   ├── test_sai_server.gd
+│   │   ├── test_sai_auth.gd
+│   │   └── ...
+│   └── integration/
+│       └── test_end_to_end.gd
+├── docs/
+│   ├── index.md
+│   ├── quick_start.md
+│   ├── api_reference.md
+│   ├── migration_from_unity.md
+│   └── examples/
+│       ├── login.md
+│       ├── inventory.md
+│       └── battle_session.md
+├── .gitignore
+├── README.md                                # Root README — pointer + quick start
+├── LICENSE
+└── CHANGELOG.md
+</pre>
+</section>
+
+<section>
+  <h2>3. plugin.cfg — Manifest</h2>
+<pre>
+[plugin]
+
+name="SaiGame Services SDK"
+description="REST client SDK for SaiGame backend. Provides Auth, GamerProgress, Inventory, Quest, Shop, Leaderboard, Battle Sessions, Mailbox, Journey services."
+author="&lt;your-name&gt;"
+version="0.1.0"
+script="plugin.gd"
+</pre>
+
+  <h3>plugin.gd — Entry point (đăng ký autoload)</h3>
+<pre>
+@tool
+extends EditorPlugin
+
+const AUTOLOAD_NAME = "SaiServer"
+const AUTOLOAD_PATH = "res://addons/sai_services/core/sai_server.gd"
+
+func _enter_tree() -&gt; void:
+    add_autoload_singleton(AUTOLOAD_NAME, AUTOLOAD_PATH)
+
+func _exit_tree() -&gt; void:
+    remove_autoload_singleton(AUTOLOAD_NAME)
+</pre>
+  <p>User chỉ cần Enable plugin trong <b>Project Settings → Plugins</b> → autoload <code>SaiServer</code> tự xuất hiện. Không cần config thủ công.</p>
+</section>
+
+<section>
+  <h2>4. Design Principles (Godot-idiomatic)</h2>
+  <ul>
+    <li><b>Signal &gt; callback</b>: thay vì <code>Action&lt;string&gt; onSuccess</code>, dùng signal Godot. Mỗi service emit <code>success</code>/<code>failed</code> signal.</li>
+    <li><b>async/await</b> thay coroutine: tất cả API call return <code>Dictionary</code>, dùng <code>await</code>.</li>
+    <li><b>Resource cho DTO</b>: Plain Dictionary cho JSON nhanh. <code>Resource</code> typed cho field cần serialize/inspect.</li>
+    <li><b>Autoload singleton</b>: <code>SaiServer</code> autoload duy nhất, sub-services là Node con của nó hoặc lazy-loaded.</li>
+    <li><b>Snake case</b>: convention GDScript. Method <code>get_progress()</code> chứ không <code>GetProgress()</code>.</li>
+    <li><b>Zero dependency</b>: không import thư viện ngoài (HTTP/JSON/crypto đều dùng built-in Godot).</li>
+    <li><b>Type hints</b>: dùng full GDScript static typing — <code>func login(username: String) -&gt; void</code>.</li>
+    <li><b>Error code thay exception</b>: GDScript thiếu exception → return Dictionary <code>{"success": bool, "error": String, "data": Variant}</code>.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>5. API mapping Unity → Godot</h2>
+  <table>
+    <tr><th>Unity (C#)</th><th>Godot (GDScript)</th><th>Note</th></tr>
+    <tr><td><code>UnityWebRequest</code></td><td><code>HTTPRequest</code> node</td><td>Built-in Godot, không cần plugin</td></tr>
+    <tr><td><code>IEnumerator</code> + <code>yield return</code></td><td><code>async</code> func + <code>await</code></td><td>Signal-based async natively</td></tr>
+    <tr><td><code>JsonUtility.ToJson()</code></td><td><code>JSON.stringify()</code></td><td>Godot built-in</td></tr>
+    <tr><td><code>JsonUtility.FromJson&lt;T&gt;()</code></td><td><code>JSON.parse_string()</code> → Dictionary</td><td>Cast typed bằng wrapper helper</td></tr>
+    <tr><td><code>MonoBehaviour</code></td><td><code>Node</code></td><td></td></tr>
+    <tr><td><code>SaiSingleton&lt;T&gt;</code></td><td>Autoload Node</td><td>1 autoload root + sub-services as child</td></tr>
+    <tr><td>C# <code>event Action&lt;T&gt;</code></td><td><code>signal&lt;T&gt;</code></td><td></td></tr>
+    <tr><td><code>[SerializeField]</code></td><td><code>@export</code></td><td></td></tr>
+    <tr><td><code>PlayerPrefs</code></td><td><code>ConfigFile</code> + <code>user://</code></td><td>Persistent settings</td></tr>
+    <tr><td>AES CBC/PKCS7 (.NET)</td><td>Godot <code>Crypto</code> + <code>CryptoKey</code></td><td>Test vector verify cross-platform</td></tr>
+    <tr><td><code>AllowAllCertificateHandler</code></td><td><code>TLSOptions.client_unsafe()</code></td><td>Dev only — block ở production build</td></tr>
+    <tr><td><code>Resources.Load()</code></td><td><code>load()</code> / <code>preload()</code></td><td></td></tr>
+    <tr><td>Custom inspector OnInspectorGUI</td><td><code>@tool</code> script + <code>EditorInspectorPlugin</code></td><td>Optional, cho debug tool</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>6. Endpoint discovery — pre-port</h2>
+  <p>Trước khi port code, phải có <b>danh sách endpoint chính xác</b> từ Unity SDK gốc.</p>
+
+  <h3>3 cách discovery</h3>
+  <ol>
+    <li>
+      <b>Static analysis Unity repo</b><br>
+      <code>git clone ss-unity &amp;&amp; grep -rn "GetRequest\|PostRequest\|PutRequest\|PatchRequest\|DeleteRequest" Assets/SaiGame/Scripts/</code><br>
+      → Liệt kê tất cả endpoint string literals trong codebase.
+    </li>
+    <li>
+      <b>Runtime capture</b><br>
+      Chạy demo Unity scene với <code>mitmproxy</code> man-in-middle → log toàn bộ request/response. Cách tốt nhất để có payload thật.
+    </li>
+    <li>
+      <b>Hỏi SaiGame</b><br>
+      Yêu cầu OpenAPI/Swagger spec hoặc Postman collection. Nếu họ có → skip cả 2 bước trên.
+    </li>
+  </ol>
+
+  <h3>Output yêu cầu</h3>
+  <p>File <code>docs/endpoints.md</code> liệt kê:</p>
+  <pre>
+| Method | Path | Auth | Body | Response | Module |
+|--------|------|------|------|----------|--------|
+| POST   | /api/auth/login        | No  | {username, password, game_id} | {access_token, refresh_token, expires_in, user} | Auth |
+| POST   | /api/auth/register     | No  | {username, password, email, game_id} | {user} | Auth |
+| POST   | /api/auth/refresh      | No  | {refresh_token} | {access_token, expires_in} | Auth |
+| POST   | /api/auth/logout       | Yes | {} | {} | Auth |
+| GET    | /api/progress          | Yes | - | {level, xp, gold, custom} | Progress |
+| PUT    | /api/progress          | Yes | {level?, xp?, gold?, custom?} | {ok} | Progress |
+| POST   | /api/battle/sessions   | Yes | {game_id, metadata} | {session_id} | Battle |
+| POST   | /api/battle/sessions/:id/events | Yes | {type, payload, ts} | {ok} | Battle |
+| POST   | /api/battle/sessions/:id/finish | Yes | {result} | {summary} | Battle |
+| GET    | /api/battle/sessions   | Yes | ?limit | {sessions[]} | Battle |
+| GET    | /api/leaderboard       | Yes | ?limit&amp;offset | {ranks[]} | Leaderboard |
+| ...    | ...                    | ... | ... | ... | ... |
+  </pre>
+</section>
+
+<section>
+  <h2>7. Roadmap port</h2>
+  <table>
+    <tr><th>Milestone</th><th>Tuần</th><th>Việc</th><th>Output</th></tr>
+    <tr>
+      <td><b>SDK-M0</b> Recon</td><td>1</td>
+      <td>Endpoint discovery (3 cách trên), liên hệ SaiGame xin spec, setup repo + plugin.cfg, CI lint GDScript.</td>
+      <td><code>docs/endpoints.md</code>, repo trống có plugin.cfg + plugin.gd + autoload working.</td>
+    </tr>
+    <tr>
+      <td><b>SDK-M1</b> Core</td><td>2</td>
+      <td>Port <code>sai_server.gd</code> (HTTP wrapper, token mgmt), <code>aes_helper.gd</code>, <code>json_helper.gd</code>. Unit test cơ bản (mock HTTPRequest).</td>
+      <td>Plugin enable được, autoload <code>SaiServer</code> chạy. AES test vector pass.</td>
+    </tr>
+    <tr>
+      <td><b>SDK-M2</b> Auth</td><td>3</td>
+      <td>Port <code>sai_auth.gd</code>, <code>google_backend_login.gd</code>, DTO <code>UserData</code>. Integration test login round-trip với staging API.</td>
+      <td>Demo scene login/logout chạy.</td>
+    </tr>
+    <tr>
+      <td><b>SDK-M3</b> Progress + Mailbox</td><td>4</td>
+      <td>Port <code>gamer_progress.gd</code>, <code>mailbox.gd</code>. CRUD test.</td>
+      <td>Demo scene save XP/gold/custom data, claim mail reward.</td>
+    </tr>
+    <tr>
+      <td><b>SDK-M4</b> Inventory</td><td>5–6</td>
+      <td>Port <code>3_ItemContainer</code> đầy đủ: player_item, container, slot, tag, crafting, gacha, generator, preset, add_deduct, move, swap, equipment_slot. ~10 file.</td>
+      <td>Demo scene full inventory management.</td>
+    </tr>
+    <tr>
+      <td><b>SDK-M5</b> Quest + Shop</td><td>7</td>
+      <td>Port chain_quest, daily_quest, progressor, history, shop.</td>
+      <td>Demo flow quest claim + purchase.</td>
+    </tr>
+    <tr>
+      <td><b>SDK-M6</b> Leaderboard + Battle + Journey</td><td>8</td>
+      <td>Port leaderboard, battle_sessions, battle_script, player_event.</td>
+      <td>Full feature parity với Unity v0.2.40d.</td>
+    </tr>
+    <tr>
+      <td><b>SDK-M7</b> Docs + Demo polish</td><td>9</td>
+      <td>API reference docs (auto-gen từ docstring), migration guide từ Unity, ví dụ code, screenshot.</td>
+      <td>Docs site (mkdocs hoặc just markdown trên GitHub Pages).</td>
+    </tr>
+    <tr>
+      <td><b>SDK-M8</b> Asset Library submit</td><td>10</td>
+      <td>Submit lên godotengine.org/asset-library. Tag <code>v0.1.0</code>, GitHub release.</td>
+      <td>SDK live trên Asset Library, install 1-click.</td>
+    </tr>
+  </table>
+
+  <h3>Tổng effort</h3>
+  <p>~10 tuần part-time hoặc <b>4–5 tuần full-time</b> solo. Có thể song song với game development — chỉ block game khi cần module cụ thể.</p>
+</section>
+
+<section>
+  <h2>8. Quality Bar (publish-ready)</h2>
+  <ul>
+    <li><span class="pill bad">Mandatory</span> Tất cả public API có docstring GDScript (## comment).</li>
+    <li><span class="pill bad">Mandatory</span> Static typing đầy đủ — không có <code>Variant</code> không cần thiết.</li>
+    <li><span class="pill bad">Mandatory</span> README quick start chạy được trong 5 phút.</li>
+    <li><span class="pill bad">Mandatory</span> Demo project working out-of-box.</li>
+    <li><span class="pill bad">Mandatory</span> LICENSE file (MIT đề xuất).</li>
+    <li><span class="pill bad">Mandatory</span> CHANGELOG semver.</li>
+    <li><span class="pill" style="background:rgba(212,175,55,0.15);color:var(--accent);border:1px solid var(--accent)">Strong</span> CI: lint (gdtoolkit), test (GUT framework).</li>
+    <li><span class="pill" style="background:rgba(212,175,55,0.15);color:var(--accent);border:1px solid var(--accent)">Strong</span> Coverage &gt;= 70% trên core (sai_server, auth, AES).</li>
+    <li><span class="pill good">Nice</span> Custom EditorInspectorPlugin cho SaiServer (debug button: ping API, manual login).</li>
+    <li><span class="pill good">Nice</span> Sample data set local mock server (Python flask) để test offline.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>9. Godot Asset Library — submit checklist</h2>
+  <p>Theo <code>godotengine.org/asset-library</code> hướng dẫn:</p>
+  <ol>
+    <li>Repo public trên GitHub/GitLab/Bitbucket.</li>
+    <li>Tag commit SemVer: <code>v0.1.0</code>.</li>
+    <li>License OSI-approved trong root LICENSE.</li>
+    <li>README có screenshot/preview (recommended).</li>
+    <li>Cấu trúc <code>addons/&lt;name&gt;/</code> chuẩn để Godot biết đây là plugin.</li>
+    <li>Đăng ký account Godot Asset Library.</li>
+    <li>Submit form: name, description, category, version compat, download URL (GitHub release zip).</li>
+    <li>Maintain: mỗi version mới tag + submit "Update" lên Asset Library.</li>
+  </ol>
+
+  <h3>Categories phù hợp</h3>
+  <ul>
+    <li><b>Tools</b> — phổ biến nhất cho SDK/plugin</li>
+    <li><b>Scripts</b> — nếu chỉ code, không tool editor</li>
+    <li>Có thể submit cả 2 category nếu phù hợp.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>10. Versioning &amp; Release</h2>
+  <h3>SemVer</h3>
+  <ul>
+    <li><b>Major</b>: breaking API change (rename method, đổi signature signal).</li>
+    <li><b>Minor</b>: thêm module mới, thêm method.</li>
+    <li><b>Patch</b>: bug fix.</li>
+  </ul>
+
+  <h3>Sync với Unity upstream</h3>
+  <p>Unity ss-unity tag version riêng (v0.2.40d). Godot port giữ <b>SemVer riêng</b> nhưng note "tracks ss-unity v0.2.40d" trong CHANGELOG. Lý do: API Godot có thể idiomatic khác Unity, không phải port 1-1 string.</p>
+
+  <h3>Release process</h3>
+  <ol>
+    <li>PR merge vào <code>main</code>.</li>
+    <li>Bump version trong <code>plugin.cfg</code> + <code>CHANGELOG.md</code>.</li>
+    <li><code>git tag v0.X.Y</code> + push.</li>
+    <li>GitHub Action <code>release.yml</code> auto-zip <code>addons/sai_services/</code> + tạo release.</li>
+    <li>Submit "Update" trên Asset Library với link release.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>11. Testing Strategy</h2>
+  <h3>Tools</h3>
+  <ul>
+    <li><b>GUT</b> (Godot Unit Test) — framework test phổ biến nhất.</li>
+    <li><b>gdtoolkit</b> — lint + format GDScript trong CI.</li>
+    <li><b>mock server</b>: Python Flask app trong <code>tests/mock_server/</code> để test offline.</li>
+  </ul>
+
+  <h3>Test layer</h3>
+  <table>
+    <tr><th>Layer</th><th>Loại test</th><th>Mục tiêu</th></tr>
+    <tr><td>Unit</td><td>Pure function: AES, JSON helper, URL builder</td><td>Coverage 90%+ cho util</td></tr>
+    <tr><td>Module unit</td><td>Mock SaiServer, test mỗi service emit signal đúng</td><td>Coverage 70%+</td></tr>
+    <tr><td>Integration</td><td>Local mock server (Flask) trả response fixed</td><td>End-to-end flow Auth → Progress → Battle</td></tr>
+    <tr><td>Smoke</td><td>Staging API thật (manual hoặc nightly CI)</td><td>Detect breaking change upstream</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>12. Tích hợp ngược vào game Checkmate Hold'em</h2>
+  <p>Sau khi <code>ss-godot</code> live trên Asset Library, game chính chỉ cần:</p>
+
+  <h3>Steps (5 phút)</h3>
+  <ol>
+    <li>Trong project Godot: <b>AssetLib tab</b> → search "SaiGame Services SDK" → Download → Install.</li>
+    <li><b>Project Settings → Plugins</b> → Enable <code>SaiGame Services SDK</code>.</li>
+    <li>Autoload <code>SaiServer</code> tự xuất hiện ở Project Settings → Autoload.</li>
+    <li>Set <code>game_id</code> trong inspector của SaiServer scene (hoặc Project Settings).</li>
+    <li>Code:
+<pre>
+# scripts/main_menu.gd
+extends Control
+
+func _on_login_pressed() -&gt; void:
+    var auth: SaiAuth = SaiServer.get_node("SaiAuth")
+    auth.login_success.connect(_on_login_ok)
+    auth.login_failed.connect(_on_login_err)
+    auth.login(username_field.text, password_field.text)
+
+func _on_login_ok(user: Dictionary) -&gt; void:
+    print("Welcome %s" % user.username)
+    get_tree().change_scene_to_file("res://scenes/lobby.tscn")
+
+func _on_login_err(error: String) -&gt; void:
+    show_toast("Login failed: %s" % error)
+</pre>
+    </li>
+  </ol>
+
+  <p class="quote">Tách project = upgrade SDK đơn giản: AssetLib có update → bấm Update → restart. Không động chạm game code.</p>
+</section>
+
+<section>
+  <h2>13. Communication với SaiGame Studio</h2>
+  <p>Trước khi bắt đầu port, nên liên hệ SaiGame studio để:</p>
+  <ol>
+    <li><b>Xác nhận license</b>: ss-unity license gì? MIT? Apache? Có cho phép port + publish derivative không?</li>
+    <li><b>Xin OpenAPI spec</b>: tiết kiệm tuần SDK-M0.</li>
+    <li><b>Xin credentials dev/staging</b>: GAME_ID + test account để dev.</li>
+    <li><b>Hỏi roadmap chính thức</b>: nếu họ định làm Godot SDK official → có thể cộng tác / contribute thay vì fork.</li>
+    <li><b>Naming convention</b>: dùng tên "SaiGame Services SDK" hay tên khác để tránh trademark conflict?</li>
+  </ol>
+
+  <p>Template email/issue mẫu:</p>
+<pre>
+Subject: [Godot port] SaiGame Services SDK — collaboration inquiry
+
+Hi SaiGame team,
+
+I'm planning to port your Unity SDK (ss-unity v0.2.40d) to Godot 4 and publish
+it on the Godot Asset Library as an open-source addon. Before I start, I'd
+like to clarify:
+
+1. Is the current ss-unity license compatible with creating a derivative
+   work for Godot? (I'll use MIT for the Godot port if acceptable.)
+2. Do you have an OpenAPI/Swagger spec or Postman collection I can use?
+3. Could I get dev/staging credentials to test against?
+4. Would you be interested in adopting the Godot port as an official
+   side-project, or prefer I keep it as a community port?
+
+Repo plan: github.com/&lt;my-handle&gt;/ss-godot
+License plan: MIT (open to discussion)
+
+Happy to credit SaiGame studio as upstream and link back from the README.
+
+Thanks!
+</pre>
+</section>
+
+<section>
+  <h2>14. Risks &amp; Mitigation</h2>
+  <table>
+    <tr><th>Risk</th><th>Likelihood</th><th>Mitigation</th></tr>
+    <tr><td>SaiGame từ chối license port</td><td>Low</td><td>Hỏi trước. Nếu từ chối → giữ private fork, dùng nội bộ.</td></tr>
+    <tr><td>API breaking change phía SaiGame</td><td>Medium</td><td>Nightly CI smoke test vs staging. Version pin theo SDK Unity reference.</td></tr>
+    <tr><td>AES Godot ↔ .NET mismatch</td><td>Medium</td><td>Test vector verify đầu SDK-M1. Fall back C# Godot build nếu lệch.</td></tr>
+    <tr><td>HTTPRequest Godot có quirk trên Web export</td><td>Medium</td><td>Test sớm trên Web build (M2). CORS coordination với SaiGame.</td></tr>
+    <tr><td>Effort thực &gt; ước tính</td><td>High</td><td>Lazy port path B: chỉ ship module cần cho game trước, các module khác để post-launch.</td></tr>
+    <tr><td>SaiGame downtime cản test</td><td>Low</td><td>Mock server local Flask.</td></tr>
+    <tr><td>Asset Library reject submit</td><td>Low</td><td>Tuân thủ checklist mục 9 chặt chẽ. Review feedback maintainer Godot.</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>15. Decision Log</h2>
+  <table>
+    <tr><th>Decision</th><th>Lý do</th></tr>
+    <tr><td>Tách project khỏi game Checkmate Hold'em</td><td>Reusable, version độc lập, community-friendly.</td></tr>
+    <tr><td>GDScript làm ngôn ngữ chính (không C#)</td><td>Zero dependency, install 1-click, web export ổn.</td></tr>
+    <tr><td>Publish lên Godot Asset Library</td><td>Phân phối tiêu chuẩn nhất, install in-editor.</td></tr>
+    <tr><td>MIT license</td><td>Match xu hướng Godot community, ít friction adoption.</td></tr>
+    <tr><td>Autoload duy nhất <code>SaiServer</code></td><td>API gọn (<code>SaiServer.Auth.login()</code>), không spam autoload.</td></tr>
+    <tr><td>Dictionary return thay typed Resource</td><td>JSON dynamic; typed Resource chỉ cho field user cần inspect.</td></tr>
+    <tr><td>SemVer độc lập, không mirror Unity version</td><td>API idiomatic khác — tránh confusion.</td></tr>
+  </table>
+</section>
+
+<div class="footer">
+  v1 — Plan port SDK độc lập. Bước tiếp: liên hệ SaiGame studio + setup repo skeleton <code>ss-godot</code>. Game Checkmate Hold'em chỉ cần wait SDK-M2 (Auth) xong để integrate.
+</div>
+
+</main>
+</body>
+</html>

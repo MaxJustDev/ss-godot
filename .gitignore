@@ -1,0 +1,60 @@
+# Godot 4
+.godot/
+.import/
+*.translation
+export.cfg
+export_presets.cfg
+exports/
+*.tmp
+
+# Imported translations
+*.translation
+
+# Mono / C# (optional builds)
+.mono/
+data_*/
+mono_crash.*.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# Local secrets / env
+.env
+.env.*
+!.env.example
+secrets.cfg
+
+# Build artifacts
+build/
+dist/
+bin/
+obj/
+
+# Test output
+.coverage
+coverage/
+test-reports/
+
+# Python (mock server, tooling)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Logs
+*.log
+logs/
+
+# Local dev launchers (user-specific)
+run-claude.bat
+run-claude.sh
