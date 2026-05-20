@@ -1,3 +1,5 @@
+*
+
 # Godot 4
 .godot/
 .import/
@@ -58,3 +60,6 @@ logs/
 # Local dev launchers (user-specific)
 run-claude.bat
 run-claude.sh
+
+# Internal port plan — not part of public SDK
+sdk_port_plan.html
