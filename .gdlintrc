@@ -1,0 +1,20 @@
+disable:
+  # Port code mirrors upstream Unity layout; arbitrary ordering of constants /
+  # signals / methods is fine for SDK-style services.
+  - class-definitions-order
+  # Port files have long upstream-cited URLs + JSON shapes in inline comments.
+  # Reformatting hurts readability more than it helps.
+  - max-line-length
+  # Service methods often early-return on each failure branch ({success: false, ...}).
+  # Multiple returns is the GDScript-idiomatic shape for this SDK's envelopes.
+  - max-returns
+  # Some service classes legitimately have >12 public methods (one per endpoint).
+  - max-public-methods
+  # Test files use descriptive long names like `test_x_does_y_under_z`; default
+  # regex rejects them. Tests + their internal helpers don't need lint enforcement
+  # of name shape — file is enough.
+  - function-name
+  - function-variable-name
+  - private-method-call
+function-arguments-number: 8
+mixed-tabs-and-spaces: error

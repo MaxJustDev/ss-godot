@@ -1,0 +1,35 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build addon zip
+        run: |
+          mkdir -p dist
+          cd addons && zip -r ../dist/sai_services-${{ github.ref_name }}.zip sai_services -x '*.gdkeep'
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/sai_services-*.zip
+          body: |
+            Auto-generated release for ${{ github.ref_name }}.
+
+            See [CHANGELOG.md](CHANGELOG.md) for changes.
+
+            ## Installation
+
+            **AssetLib** (after submission accepted): Godot editor → AssetLib → search "SaiGame Services SDK".
+
+            **Manual**: download `sai_services-${{ github.ref_name }}.zip`, extract `sai_services/` into your project's `addons/` folder, enable in Project Settings → Plugins.
+          generate_release_notes: true

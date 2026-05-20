@@ -1,0 +1,64 @@
+[gd_scene load_steps=2 format=3 uid="uid://b1ssgodotlobbyscene1"]
+
+[ext_resource type="Script" path="res://scripts/lobby_demo.gd" id="1_lobby_script"]
+
+[node name="LobbyScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_lobby_script")
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 24.0
+offset_right = 360.0
+offset_bottom = 48.0
+text = "ss-godot - lobby demo"
+
+[node name="WelcomeLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 64.0
+offset_right = 360.0
+offset_bottom = 88.0
+text = "Logged in as ..."
+
+[node name="SaveButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 112.0
+offset_right = 360.0
+offset_bottom = 144.0
+text = "Save progress"
+
+[node name="LoadButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 160.0
+offset_right = 360.0
+offset_bottom = 192.0
+text = "Load progress"
+
+[node name="ResetButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 208.0
+offset_right = 360.0
+offset_bottom = 240.0
+text = "Reset progress"
+
+[node name="StatusLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 256.0
+offset_right = 360.0
+offset_bottom = 280.0
+text = "Ready."
+
+[connection signal="pressed" from="SaveButton" to="." method="_on_save_button_pressed"]
+[connection signal="pressed" from="LoadButton" to="." method="_on_load_button_pressed"]
+[connection signal="pressed" from="ResetButton" to="." method="_on_reset_button_pressed"]

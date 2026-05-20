@@ -1,0 +1,26 @@
+; Demo project showcasing ss-godot SDK.
+; Open in Godot 4.3+. Plugin path points at sibling addons/ via symlink or copy.
+
+config_version=5
+
+[application]
+
+config/name="ss-godot Demo"
+config/description="Demo showcasing SaiGame Services SDK (Godot port)."
+run/main_scene="res://scenes/login.tscn"
+config/features=PackedStringArray("4.3", "GL Compatibility")
+config/icon="res://icon.svg"
+
+[autoload]
+
+; SaiServer is auto-registered by the plugin when enabled.
+; For the demo we expect addons/sai_services/ to be copied into this project.
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/sai_services/plugin.cfg")
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

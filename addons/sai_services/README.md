@@ -49,4 +49,4 @@ SaiServer.auth_required()
 
 ## Status
 
-`v0.1.0-dev` — M0 skeleton. See [../../CHANGELOG.md](../../CHANGELOG.md) and [../../sdk_port_plan.html](../../sdk_port_plan.html).
+`v0.1.0` — first public release. Tracks ss-unity v0.2.40d. See [../../CHANGELOG.md](../../CHANGELOG.md).
